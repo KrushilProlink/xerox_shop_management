@@ -9,6 +9,7 @@ import Login from './pages/auth'
 import Dashboard from './pages/dashboard'
 import Orders from './pages/orders'
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import Student from './pages/student';
 function App() {
  const { isLoggedIn } = useAuth();
   
@@ -36,6 +37,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Orders />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/students" 
+          element={
+            <ProtectedRoute>
+              <Student />
             </ProtectedRoute>
           } 
         />

@@ -63,6 +63,10 @@ export default function Dashboard() {
 
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
+            <StatCard title="Total Students" value="2" />
+          </Grid>
+          
+          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
             <StatCard title="Total Orders" value="7" />
           </Grid>
 
@@ -72,10 +76,6 @@ export default function Dashboard() {
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
             <StatCard title="Completed" value="4" />
-          </Grid>
-
-          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Online" value="2" />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
@@ -134,10 +134,12 @@ export default function Dashboard() {
             <Button
               fullWidth
               variant="outlined"
-              color="error"
+              color="primary"
+              startIcon={<Search />}
+              onClick={() => navigate("/students")}
               sx={{ textTransform: "none", py: 1 }}
             >
-              Reset Database (Clear Orders)
+              View Students
             </Button>
           </Box>
         </Paper>
