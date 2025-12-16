@@ -13,9 +13,11 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.1",
+    "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "fs": "^0.0.1-security",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "jwt-decode": "^4.0.0",
