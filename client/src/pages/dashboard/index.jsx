@@ -25,6 +25,9 @@ import {
 } from "recharts";
 import { Header } from "../../components/layout/header";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axiosInstance from "../../api/axiosInstance";
+import { useEffect } from "react";
 
 // Mock data for the chart
 
@@ -45,7 +48,32 @@ const data = [
 ];
 
 export default function Dashboard() {
+  const [dashboard, setDashboard] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [filterType, setFilterType] = useState("all");
+
   const navigate = useNavigate();
+
+  const handleFetchDashboard = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axiosInstance.get("/api/dashboard", {
+        params: { filterType },
+      });
+      if (res.status === 200) {
+        setDashboard(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    handleFetchDashboard();
+  }, [filterType]);
+
   return (
     <Box
       sx={{
@@ -63,27 +91,27 @@ export default function Dashboard() {
 
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Students" value="2" />
-          </Grid>
-          
-          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Orders" value="7" />
+            <StatCard title="Total Students" value={dashboard?.totalStudents || 0} />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Pending" value="3" />
+            <StatCard title="Total Orders" value={dashboard?.totalOrders || 0} />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Completed" value="4" />
+            <StatCard title="Pending" value={dashboard?.pendingOrders} />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Cash" value="5" />
+            <StatCard title="Completed" value={dashboard?.completedOrders} />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Earned (₹)" value="37" />
+            <StatCard title="Cash" value={dashboard?.cashCount} />
+          </Grid>
+
+          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
+            <StatCard title="Total Earned (₹)" value={dashboard?.totalEarned} />
           </Grid>
         </Grid>
 
@@ -103,7 +131,13 @@ export default function Dashboard() {
           }}
         >
           <FormControl size="small" sx={{ minWidth: 200, flex: { md: 1 } }}>
-            <Select defaultValue="today" displayEmpty>
+            <Select
+              defaultValue="all"
+              displayEmpty
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <MenuItem value="all">All</MenuItem>
               <MenuItem value="today">Today</MenuItem>
               <MenuItem value="yesterday">Yesterday</MenuItem>
               <MenuItem value="week">This Week</MenuItem>

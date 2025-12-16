@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { ArrowBack, Refresh, Search } from "@mui/icons-material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import {
   Box,
@@ -7,6 +8,7 @@ import {
   Card,
   CircularProgress,
   FormControl,
+  IconButton,
   MenuItem,
   Pagination,
   Paper,
@@ -48,7 +50,7 @@ export default function Student() {
       if (searchItem !== "") {
         params.search = searchItem;
       }
-      const res = await axiosInstance.get("/api/user", { params });
+      const res = await axiosInstance.get("/api/student", { params });
 
       if (res.status === 200) {
         setStudents(res.data.data);
@@ -58,6 +60,20 @@ export default function Student() {
       console.error("Error fetching orders:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteStudent = async (id) => {
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      try {
+        const res = await axiosInstance.delete(`/api/student/${id}`);
+        if (res.status === 200) {
+          // alert("Student deleted successfully");
+          handleFetchStudent(page);
+        }
+      } catch (error) {
+        console.error("Error deleting student:", error);
+      }
     }
   };
 
@@ -244,7 +260,18 @@ export default function Student() {
                         )}
                       </TableCell>
 
-                      <TableCell></TableCell>
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteStudent(student._id)}
+                          sx={{
+                            color: "#ef4444",
+                            "&:hover": { bgcolor: "#fee2e2" },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

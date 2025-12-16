@@ -6,7 +6,7 @@ const index = async (req, res) => {
 
     const userId = req.user._id;
 
-    let filter = { role: 'user' };
+    let filter = { role: "user" };
 
     if (search) {
       const orConditions = [
@@ -51,4 +51,21 @@ const index = async (req, res) => {
   }
 };
 
-module.exports = { index };
+const studentDelete = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    await User.findByIdAndDelete(userId);
+    res.status(200).json({
+      success: true,
+      message: "Student deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { index,studentDelete };
