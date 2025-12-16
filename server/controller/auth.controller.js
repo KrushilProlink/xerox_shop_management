@@ -48,6 +48,14 @@ const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Incorrect password." });
     delete user.password;
+
+    if(user.role !== 'admin'){
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin only",
+      });
+    }
+    
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.json({
       success: true,

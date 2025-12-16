@@ -339,7 +339,7 @@ export default function Orders() {
                       </TableCell>
                       {/* <TableCell>—</TableCell> */}
                       <TableCell>
-                        {moment(order.createdAt).format("DD MMM, YYYY HH:mm")}
+                        {moment(order.createdAt).format("DD/MM/YYYY, h:mm:ss A")}
                       </TableCell>
                       <TableCell>
                         <Stack spacing={1}>

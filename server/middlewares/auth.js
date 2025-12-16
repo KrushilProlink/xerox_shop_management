@@ -1,11 +1,11 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-
-const verifyToken = (req, res, next) => {
+const User = require("../model/schema/user");
+const verifyAdmin = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
         message: "No token provided",
@@ -13,10 +13,17 @@ const verifyToken = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin only",
+      });
+    }
 
-    req.user = decoded;
+    req.user = user;
 
     next();
   } catch (error) {
@@ -27,4 +34,4 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = verifyToken;
+module.exports = verifyAdmin;
