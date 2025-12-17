@@ -28,24 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useEffect } from "react";
-
-// Mock data for the chart
-
-const data = [
-  { name: "Day 1", count: 0 },
-
-  { name: "Day 2", count: 0 },
-
-  { name: "Day 3", count: 0 },
-
-  { name: "Day 4", count: 0 },
-
-  { name: "Day 5", count: 0 },
-
-  { name: "Day 6", count: 0 },
-
-  { name: "Day 7", count: 0 },
-];
+import moment from "moment";
 
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState([]);
@@ -61,7 +44,7 @@ export default function Dashboard() {
         params: { filterType },
       });
       if (res.status === 200) {
-        setDashboard(res.data.data);
+        setDashboard(res.data);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -69,7 +52,7 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
-
+  
   useEffect(() => {
     handleFetchDashboard();
   }, [filterType]);
@@ -91,27 +74,42 @@ export default function Dashboard() {
 
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Students" value={dashboard?.totalStudents || 0} />
+            <StatCard
+              title="Total Students"
+              value={dashboard?.data?.totalStudents || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Orders" value={dashboard?.totalOrders || 0} />
+            <StatCard
+              title="Total Orders"
+              value={dashboard?.data?.totalOrders || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Pending" value={dashboard?.pendingOrders} />
+            <StatCard
+              title="Pending"
+              value={dashboard?.data?.pendingOrders || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Completed" value={dashboard?.completedOrders} />
+            <StatCard
+              title="Completed"
+              value={dashboard?.data?.completedOrders || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Cash" value={dashboard?.cashCount} />
+            <StatCard title="Cash" value={dashboard?.data?.cashCount || 0} />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Earned (₹)" value={dashboard?.totalEarned} />
+            <StatCard
+              title="Total Earned (₹)"
+              value={dashboard?.data?.totalEarned || 0}
+            />
           </Grid>
         </Grid>
 
@@ -180,9 +178,26 @@ export default function Dashboard() {
 
         {/* Second Stats Row */}
 
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 3 }} textTransform={"capitalize"}>
           <Grid size={{ xs: 12, md: 3 }}>
-            <InfoCard label="Filter: Today" value="—" />
+            <InfoCard
+              label={`Filter: ${filterType}`}
+              value={
+                dashboard?.filters?.fromDate
+                  ? dashboard?.filters?.filterType === "today" ||
+                    dashboard?.filters?.filterType === "yesterday"
+                    ? moment(dashboard?.filters?.fromDate).format("DD/MM/YYYY")
+                    : `${
+                        moment(dashboard?.filters?.fromDate).format(
+                          "DD/MM/YYYY"
+                        ) +
+                        " To " +
+                        moment(dashboard?.filters?.toDate).format("DD/MM/YYYY")
+                      }`
+                  : "--"
+              }
+              style={{ textTransform: "capitalize", fontSize: "16px" }}
+            />
           </Grid>
 
           <Grid size={{ xs: 12, md: 3 }}>
@@ -223,7 +238,7 @@ export default function Dashboard() {
 
             <Box sx={{ height: 300, width: "100%" }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
+                <BarChart data={dashboard?.chartData}>
                   <XAxis
                     dataKey="name"
                     stroke="#94a3b8"
@@ -329,21 +344,16 @@ function StatCard({ title, value }) {
   );
 }
 
-function InfoCard({ label, value, subtext }) {
+function InfoCard({ label, value, subtext, style }) {
   return (
     <Card
       elevation={0}
       sx={{
         border: "1px solid #e2e8f0",
-
         borderRadius: 3,
-
         height: "100%",
-
         display: "flex",
-
         alignItems: "center",
-
         justifyContent: "center",
       }}
     >
@@ -358,7 +368,11 @@ function InfoCard({ label, value, subtext }) {
         </Typography>
 
         {value && (
-          <Typography variant="h4" sx={{ fontWeight: 700, color: "#0f172a" }}>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 700, color: "#0f172a" }}
+            style={style}
+          >
             {value}
           </Typography>
         )}

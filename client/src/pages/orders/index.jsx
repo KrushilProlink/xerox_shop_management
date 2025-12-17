@@ -31,6 +31,7 @@ import {
   Print,
   Refresh,
   Search,
+  DeleteForever,
 } from "@mui/icons-material";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
@@ -103,6 +104,17 @@ export default function Orders() {
         printWindow.focus();
         printWindow.print();
       };
+    }
+  };
+
+  const handleDelete = async (orderId) => {
+    try {
+      const res = await axiosInstance.delete(`/api/order/delete/${orderId}`);
+      if (res.status === 200) {
+        handleFetchOrders(page);
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
     }
   };
 
@@ -339,7 +351,9 @@ export default function Orders() {
                       </TableCell>
                       {/* <TableCell>—</TableCell> */}
                       <TableCell>
-                        {moment(order.createdAt).format("DD/MM/YYYY, h:mm:ss A")}
+                        {moment(order.createdAt).format(
+                          "DD/MM/YYYY, h:mm:ss A"
+                        )}
                       </TableCell>
                       <TableCell>
                         <Stack spacing={1}>
@@ -379,6 +393,21 @@ export default function Orders() {
                             onClick={() => handlePrint(order?.file?.url)}
                           >
                             Print
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<DeleteForever sx={{ fontSize: 14 }} />}
+                            color="error"
+                            sx={{
+                              fontSize: "0.65rem",
+                              py: 0.5,
+                              minWidth: "auto",
+                              textTransform: "none",
+                            }}
+                            onClick={() => handleDelete(order?._id)}
+                          >
+                            Delete
                           </Button>
                         </Stack>
                       </TableCell>

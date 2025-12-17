@@ -104,7 +104,13 @@ const createOrder = async (req, res) => {
 const changeOrderStatus = async (req, res) => {
   try {
     const { status, orderId } = req.body;
-    await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    const orders = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
+    orders.updatedAt = Date.now();
+    await orders.save();
     res.status(200).json({
       success: true,
       message: "Order status updated successfully",
@@ -117,5 +123,30 @@ const changeOrderStatus = async (req, res) => {
     });
   }
 };
+const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { index, createOrder, changeOrderStatus };
+    const order = await Order.findByIdAndDelete(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { index, createOrder, changeOrderStatus, deleteOrder };
