@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import { Login as LoginIcon, Print } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  TextField,
-  Button,
   CircularProgress,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { Print, Login as LoginIcon } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import { useAuth } from "../../context/AuthContext";
-import axios from "axios";
-import * as Yup from "yup";
 import { useFormik } from "formik";
+import { useState } from "react";
+import * as Yup from "yup";
+import axiosInstance from "../../api/axiosInstance";
+import { useAuth } from "../../context/AuthContext";
 import { generateAlert } from "../../utils/alertService";
 
 const GradientIconBox = styled(Box)(({ theme }) => ({
@@ -47,7 +47,7 @@ export default function Login() {
     const payload = { email: values?.email, password: values?.password };
 
     try {
-      const res = await axios.post("/api/auth/login", payload);
+      const res = await axiosInstance.post("/api/auth/login", payload);
       if (res.status === 200) {
         generateAlert(res?.data?.message, "success");
         login(res.data);
