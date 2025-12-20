@@ -12,6 +12,9 @@ import { Print, Login as LoginIcon } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
+import * as Yup from "yup";
+import { useFormik } from "formik";
+
 const GradientIconBox = styled(Box)(({ theme }) => ({
   width: 40,
   height: 40,
@@ -25,19 +28,29 @@ const GradientIconBox = styled(Box)(({ theme }) => ({
 }));
 
 export default function Login() {
-  const [email, setEmail] = useState("krushil.dev@gmail.com");
-  const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const validationSchema = Yup.object({
+    email: Yup.string().required("Email is required"),
+    password: Yup.string().required("Password is required"),
+  });
+
+  const initialValues = {
+    email: "krushil.dev@gmail.com",
+    password: "admin123",
+  };
+
+  const handleLogin = async (values) => {
     setLoading(true);
-    const payload = { email, password };
-   
+    const payload = { email: values?.email, password: values?.password };
+
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/login", payload);
-      if(res.status === 200){
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        payload
+      );
+      if (res.status === 200) {
         login(res.data);
       }
     } catch (error) {
@@ -46,6 +59,15 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      handleLogin(values);
+    },
+  });
 
   return (
     <Box
@@ -107,7 +129,7 @@ export default function Login() {
           {/* Login Form */}
           <Box
             component="form"
-            onSubmit={handleLogin}
+            onSubmit={formik.handleSubmit}
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <TextField
@@ -115,9 +137,11 @@ export default function Login() {
               variant="outlined"
               size="small"
               fullWidth
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
             />
             <TextField
               label="Password"
@@ -125,9 +149,11 @@ export default function Login() {
               variant="outlined"
               size="small"
               fullWidth
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
             />
             <Button
               type="submit"

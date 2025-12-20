@@ -15,15 +15,11 @@ function App() {
   
   return (
     <>
-      <Routes> {/* <--- Use Routes container */}
-        
-        {/* Public Route: Login Page */}
+      <Routes> 
         <Route 
           path="/login" 
           element={isLoggedIn ? <Navigate to="/" replace /> : <Login />}
         />
-        
-        {/* Protected Routes: Wrap components in <ProtectedRoute> */}
         <Route 
           path="/" 
           element={
@@ -49,7 +45,6 @@ function App() {
           } 
         />
 
-        {/* Catch-all Route: Redirects users to the appropriate starting point */}
         <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} replace />} />
         
       </Routes>
