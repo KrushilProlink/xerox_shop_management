@@ -37,8 +37,8 @@ export default function Login() {
   });
 
   const initialValues = {
-    email: "krushil.dev@gmail.com",
-    password: "admin123",
+    email: "",
+    password: "",
   };
 
   const handleLogin = async (values) => {
