@@ -5,8 +5,9 @@ export const setAlertHandler = (handler) => {
 };
 
 export const generateAlert = (message, severity = "success") => {
+  // alert(message)
   if (alertHandler) {
-    alertHandler(message, severity);
+    alertHandler(message, severity);  
   } else {
     console.warn("Alert handler not set");
   }

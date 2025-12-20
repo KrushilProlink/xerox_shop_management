@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { setAlertHandler } from "../utils/alertService";
+import GenerateAlert from "../components/Alert/GenerateAlert";
 
 const AlertContext = createContext();
 
@@ -22,6 +23,7 @@ export const AlertProvider = ({ children }) => {
     setAlert((prev) => ({ ...prev, open: false }));
   };
 
+  // 🔥 REGISTER GLOBAL HANDLER
   useEffect(() => {
     setAlertHandler(generateAlert);
   }, []);
@@ -29,6 +31,13 @@ export const AlertProvider = ({ children }) => {
   return (
     <AlertContext.Provider value={{ generateAlert }}>
       {children}
+
+      <GenerateAlert
+        open={alert.open}
+        message={alert.message}
+        severity={alert.severity}
+        onClose={handleClose}
+      />
     </AlertContext.Provider>
   );
 };

@@ -57,7 +57,9 @@ export default function Login() {
       }
     } catch (error) {
       generateAlert(error?.response?.data?.message || "Login failed", "error");
-      console.error("Login failed:", error);
+      console.error("Login failed:", error
+        
+      );
     } finally {
       setLoading(false);
     }
