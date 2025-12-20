@@ -47,19 +47,14 @@ export default function Login() {
     const payload = { email: values?.email, password: values?.password };
 
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        payload
-      );
+      const res = await axios.post("/api/auth/login", payload);
       if (res.status === 200) {
         generateAlert(res?.data?.message, "success");
         login(res.data);
       }
     } catch (error) {
       generateAlert(error?.response?.data?.message || "Login failed", "error");
-      console.error("Login failed:", error
-        
-      );
+      console.error("Login failed:", error);
     } finally {
       setLoading(false);
     }
