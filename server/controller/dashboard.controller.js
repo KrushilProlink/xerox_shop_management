@@ -167,6 +167,7 @@ const index = async (req, res) => {
         cashCount: orderStats.cashCount[0]?.count || 0,
       },
       chartData,
+      lastUpdated: now,
       message: "Dashboard data fetched successfully",
     });
   } catch (error) {

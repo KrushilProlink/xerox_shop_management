@@ -29,6 +29,8 @@ import { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useEffect } from "react";
 import moment from "moment";
+import Footer from "../../components/layout/footer";
+import { generateAlert } from "../../utils/alertService";
 
 export default function Student() {
   const [students, setStudents] = useState([]);
@@ -57,7 +59,8 @@ export default function Student() {
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      generateAlert("Error fetching students", "error");
+      console.error("Error fetching students:", error);
     } finally {
       setIsLoading(false);
     }
@@ -68,10 +71,11 @@ export default function Student() {
       try {
         const res = await axiosInstance.delete(`/api/student/${id}`);
         if (res.status === 200) {
-          // alert("Student deleted successfully");
+          generateAlert(res?.data?.message, "success");
           handleFetchStudent(page);
         }
       } catch (error) {
+        generateAlert("Error deleting student", "error");
         console.error("Error deleting student:", error);
       }
     }
@@ -314,15 +318,7 @@ export default function Student() {
           )}
         </Card>
       </Box>
-
-      {/* Footer */}
-
-      <Box sx={{ mt: 6, textAlign: "center", pb: 3 }}>
-        <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
-          Introducing Smart-Xerox — A Digital Solution for College Xerox Shop
-          Management
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 }

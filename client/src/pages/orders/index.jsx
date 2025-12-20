@@ -34,9 +34,11 @@ import {
   DeleteForever,
 } from "@mui/icons-material";
 import moment from "moment";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 import { Header } from "../../components/layout/header";
+import Footer from "../../components/layout/footer";
+import { generateAlert } from "../../utils/alertService";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -68,6 +70,7 @@ export default function Orders() {
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (error) {
+      generateAlert("Error fetching orders", "error");
       console.error("Error fetching orders:", error);
     } finally {
       setIsLoading(false);
@@ -83,16 +86,23 @@ export default function Orders() {
   };
 
   const handleChangeOrderStatus = async (orderId, newStatus) => {
-    try {
-      const res = await axiosInstance.patch("/api/order/change-status", {
-        orderId,
-        status: newStatus,
-      });
-      if (res.status === 200) {
-        handleFetchOrders(page);
+    if (
+      window.confirm("Are you sure you want to change this order’s status?")
+    ) {
+      try {
+        const res = await axiosInstance.patch("/api/order/change-status", {
+          orderId,
+          status: newStatus,
+        });
+
+        if (res.status === 200) {
+          generateAlert(res?.data?.message, "success");
+          handleFetchOrders(page);
+        }
+      } catch (error) {
+        generateAlert("Error changing order status", "error");
+        console.error("Error changing order status:", error);
       }
-    } catch (error) {
-      console.error("Error changing order status:", error);
     }
   };
 
@@ -108,13 +118,18 @@ export default function Orders() {
   };
 
   const handleDelete = async (orderId) => {
-    try {
-      const res = await axiosInstance.delete(`/api/order/delete/${orderId}`);
-      if (res.status === 200) {
-        handleFetchOrders(page);
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      try {
+        const res = await axiosInstance.delete(`/api/order/delete/${orderId}`);
+        if (res.status === 200) {
+          generateAlert(res?.data?.message, "success");
+          4;
+          handleFetchOrders(page);
+        }
+      } catch (error) {
+        generateAlert("Error deleting order", "error");
+        console.error("Error deleting order:", error);
       }
-    } catch (error) {
-      console.error("Error deleting order:", error);
     }
   };
 
@@ -174,15 +189,6 @@ export default function Orders() {
                   <MenuItem value="completed">Completed</MenuItem>
                 </Select>
               </FormControl>
-
-              {/* <FormControl size="small" sx={{ minWidth: 180 }}>
-                <Select defaultValue="all-payment" displayEmpty>
-                  <MenuItem value="all-payment">All Payment</MenuItem>
-                  <MenuItem value="cash">Cash</MenuItem>
-                  <MenuItem value="online">Online</MenuItem>
-                </Select>
-              </FormControl> */}
-
               <TextField
                 size="small"
                 placeholder="Search by student"
@@ -197,7 +203,6 @@ export default function Orders() {
                     "& fieldset": { borderColor: "#e2e8f0 !important" },
                   },
                 }}
-                // sx={{ minWidth: { xs: "100%", md: 250 } }}
               />
             </Stack>
 
@@ -285,10 +290,6 @@ export default function Orders() {
                   <TableCell sx={{ color: "white", fontWeight: 600 }}>
                     Status
                   </TableCell>
-
-                  {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                    Payment
-                  </TableCell> */}
 
                   <TableCell sx={{ color: "white", fontWeight: 600 }}>
                     Created
@@ -453,15 +454,7 @@ export default function Orders() {
           )}
         </Card>
       </Box>
-
-      {/* Footer */}
-
-      <Box sx={{ mt: 6, textAlign: "center", pb: 3 }}>
-        <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
-          Introducing Smart-Xerox — A Digital Solution for College Xerox Shop
-          Management
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 }

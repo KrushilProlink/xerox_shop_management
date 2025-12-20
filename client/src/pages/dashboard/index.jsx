@@ -11,6 +11,7 @@ import {
   FormControl,
   Paper,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 
 import { Search } from "@mui/icons-material";
@@ -29,6 +30,8 @@ import { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useEffect } from "react";
 import moment from "moment";
+import Footer from "../../components/layout/footer";
+import { generateAlert } from "../../utils/alertService";
 
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState([]);
@@ -47,12 +50,13 @@ export default function Dashboard() {
         setDashboard(res.data);
       }
     } catch (error) {
+      generateAlert("Error fetching dashboard data", "error");
       console.error("Error fetching dashboard data:", error);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => {
     handleFetchDashboard();
   }, [filterType]);
@@ -67,8 +71,6 @@ export default function Dashboard() {
       }}
     >
       <Header />
-
-      {/* <Box sx={{ maxWidth: "1280px", mx: "auto" }}> */}
       <Box>
         {/* Top Stats Row */}
 
@@ -211,7 +213,11 @@ export default function Dashboard() {
           <Grid size={{ xs: 12, md: 3 }}>
             <InfoCard
               label="Updated"
-              subtext="12/11/2025, 10:37:19 AM"
+              subtext={
+                dashboard?.lastUpdated
+                  ? moment(dashboard?.lastUpdated).format("DD/MM/YYYY hh:mm A")
+                  : "--"
+              }
               value=""
             />
           </Grid>
@@ -237,54 +243,62 @@ export default function Dashboard() {
             </Typography>
 
             <Box sx={{ height: 300, width: "100%" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dashboard?.chartData}>
-                  <XAxis
-                    dataKey="name"
-                    stroke="#94a3b8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}`}
-                  />
-
-                  <Tooltip
-                    cursor={{ fill: "#f1f5f9" }}
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "none",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+              {isLoading ? (
+                <>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
-                  />
+                  >
+                    <CircularProgress size={30} />
+                  </Box>
+                </>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dashboard?.chartData}>
+                    <XAxis
+                      dataKey="name"
+                      stroke="#94a3b8"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
 
-                  <Bar
-                    dataKey="count"
-                    fill="#3b82f6"
-                    radius={[4, 4, 0, 0]}
-                    barSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+                    <YAxis
+                      stroke="#94a3b8"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}`}
+                    />
+
+                    <Tooltip
+                      cursor={{ fill: "#f1f5f9" }}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "none",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                    />
+
+                    <Bar
+                      dataKey="count"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                      barSize={40}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </Box>
           </CardContent>
         </Card>
       </Box>
-
-      {/* Footer */}
-
-      <Box sx={{ mt: 6, textAlign: "center", pb: 3 }}>
-        <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
-          Introducing Smart-Xerox — A Digital Solution for College Xerox Shop
-          Management
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 }
