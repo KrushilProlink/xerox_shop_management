@@ -203,7 +203,7 @@ export default function Dashboard() {
           </Grid>
 
           <Grid size={{ xs: 12, md: 3 }}>
-            <InfoCard label="Cash Count" value="1" subtext="₹5" />
+            <InfoCard label="Cash Count" value="0" subtext="₹0" />
           </Grid>
 
           <Grid size={{ xs: 12, md: 3 }}>
