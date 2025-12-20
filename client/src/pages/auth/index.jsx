@@ -14,6 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import { generateAlert } from "../../utils/alertService";
 
 const GradientIconBox = styled(Box)(({ theme }) => ({
   width: 40,
@@ -51,9 +52,11 @@ export default function Login() {
         payload
       );
       if (res.status === 200) {
+        generateAlert(res?.data?.message, "success");
         login(res.data);
       }
     } catch (error) {
+      generateAlert(error?.response?.data?.message || "Login failed", "error");
       console.error("Login failed:", error);
     } finally {
       setLoading(false);

@@ -8,7 +8,6 @@ import {
   Chip,
   CircularProgress,
   FormControl,
-  Link,
   MenuItem,
   Pagination,
   Paper,
@@ -21,23 +20,23 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 
 import {
   ArrowBack,
   CheckCircle,
+  DeleteForever,
   Description,
   Print,
   Refresh,
   Search,
-  DeleteForever,
 } from "@mui/icons-material";
 import moment from "moment";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
-import { Header } from "../../components/layout/header";
 import Footer from "../../components/layout/footer";
+import { Header } from "../../components/layout/header";
 import { generateAlert } from "../../utils/alertService";
 
 export default function Orders() {
