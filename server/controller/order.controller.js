@@ -36,7 +36,7 @@ const index = async (req, res) => {
     const totalRecords = await Order.countDocuments(filter);
 
     const orders = await Order.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(perPage);
 
