@@ -8,7 +8,6 @@ import {
   Chip,
   CircularProgress,
   FormControl,
-  Link,
   MenuItem,
   Pagination,
   Paper,
@@ -21,12 +20,13 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 
 import {
   ArrowBack,
   CheckCircle,
+  DeleteForever,
   Description,
   Print,
   Refresh,
@@ -35,7 +35,9 @@ import {
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
+import Footer from "../../components/layout/footer";
 import { Header } from "../../components/layout/header";
+import { generateAlert } from "../../utils/alertService";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -67,6 +69,7 @@ export default function Orders() {
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (error) {
+      generateAlert("Error fetching orders", "error");
       console.error("Error fetching orders:", error);
     } finally {
       setIsLoading(false);
@@ -82,16 +85,23 @@ export default function Orders() {
   };
 
   const handleChangeOrderStatus = async (orderId, newStatus) => {
-    try {
-      const res = await axiosInstance.patch("/api/order/change-status", {
-        orderId,
-        status: newStatus,
-      });
-      if (res.status === 200) {
-        handleFetchOrders(page);
+    if (
+      window.confirm("Are you sure you want to change this order’s status?")
+    ) {
+      try {
+        const res = await axiosInstance.patch("/api/order/change-status", {
+          orderId,
+          status: newStatus,
+        });
+
+        if (res.status === 200) {
+          generateAlert(res?.data?.message, "success");
+          handleFetchOrders(page);
+        }
+      } catch (error) {
+        generateAlert("Error changing order status", "error");
+        console.error("Error changing order status:", error);
       }
-    } catch (error) {
-      console.error("Error changing order status:", error);
     }
   };
 
@@ -103,6 +113,22 @@ export default function Orders() {
         printWindow.focus();
         printWindow.print();
       };
+    }
+  };
+
+  const handleDelete = async (orderId) => {
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      try {
+        const res = await axiosInstance.delete(`/api/order/delete/${orderId}`);
+        if (res.status === 200) {
+          generateAlert(res?.data?.message, "success");
+          4;
+          handleFetchOrders(page);
+        }
+      } catch (error) {
+        generateAlert("Error deleting order", "error");
+        console.error("Error deleting order:", error);
+      }
     }
   };
 
@@ -162,15 +188,6 @@ export default function Orders() {
                   <MenuItem value="completed">Completed</MenuItem>
                 </Select>
               </FormControl>
-
-              {/* <FormControl size="small" sx={{ minWidth: 180 }}>
-                <Select defaultValue="all-payment" displayEmpty>
-                  <MenuItem value="all-payment">All Payment</MenuItem>
-                  <MenuItem value="cash">Cash</MenuItem>
-                  <MenuItem value="online">Online</MenuItem>
-                </Select>
-              </FormControl> */}
-
               <TextField
                 size="small"
                 placeholder="Search by student"
@@ -185,7 +202,6 @@ export default function Orders() {
                     "& fieldset": { borderColor: "#e2e8f0 !important" },
                   },
                 }}
-                // sx={{ minWidth: { xs: "100%", md: 250 } }}
               />
             </Stack>
 
@@ -274,10 +290,6 @@ export default function Orders() {
                     Status
                   </TableCell>
 
-                  {/* <TableCell sx={{ color: "white", fontWeight: 600 }}>
-                    Payment
-                  </TableCell> */}
-
                   <TableCell sx={{ color: "white", fontWeight: 600 }}>
                     Created
                   </TableCell>
@@ -339,7 +351,9 @@ export default function Orders() {
                       </TableCell>
                       {/* <TableCell>—</TableCell> */}
                       <TableCell>
-                        {moment(order.createdAt).format("DD MMM, YYYY HH:mm")}
+                        {moment(order.createdAt).format(
+                          "DD/MM/YYYY, h:mm:ss A"
+                        )}
                       </TableCell>
                       <TableCell>
                         <Stack spacing={1}>
@@ -379,6 +393,21 @@ export default function Orders() {
                             onClick={() => handlePrint(order?.file?.url)}
                           >
                             Print
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<DeleteForever sx={{ fontSize: 14 }} />}
+                            color="error"
+                            sx={{
+                              fontSize: "0.65rem",
+                              py: 0.5,
+                              minWidth: "auto",
+                              textTransform: "none",
+                            }}
+                            onClick={() => handleDelete(order?._id)}
+                          >
+                            Delete
                           </Button>
                         </Stack>
                       </TableCell>
@@ -424,15 +453,7 @@ export default function Orders() {
           )}
         </Card>
       </Box>
-
-      {/* Footer */}
-
-      <Box sx={{ mt: 6, textAlign: "center", pb: 3 }}>
-        <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
-          Introducing Smart-Xerox — A Digital Solution for College Xerox Shop
-          Management
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 }

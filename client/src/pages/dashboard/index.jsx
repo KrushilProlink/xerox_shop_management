@@ -11,6 +11,7 @@ import {
   FormControl,
   Paper,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 
 import { Search } from "@mui/icons-material";
@@ -25,27 +26,41 @@ import {
 } from "recharts";
 import { Header } from "../../components/layout/header";
 import { useNavigate } from "react-router-dom";
-
-// Mock data for the chart
-
-const data = [
-  { name: "Day 1", count: 0 },
-
-  { name: "Day 2", count: 0 },
-
-  { name: "Day 3", count: 0 },
-
-  { name: "Day 4", count: 0 },
-
-  { name: "Day 5", count: 0 },
-
-  { name: "Day 6", count: 0 },
-
-  { name: "Day 7", count: 0 },
-];
+import { useState } from "react";
+import axiosInstance from "../../api/axiosInstance";
+import { useEffect } from "react";
+import moment from "moment";
+import Footer from "../../components/layout/footer";
+import { generateAlert } from "../../utils/alertService";
 
 export default function Dashboard() {
+  const [dashboard, setDashboard] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [filterType, setFilterType] = useState("all");
+
   const navigate = useNavigate();
+
+  const handleFetchDashboard = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axiosInstance.get("/api/dashboard", {
+        params: { filterType },
+      });
+      if (res.status === 200) {
+        setDashboard(res.data);
+      }
+    } catch (error) {
+      generateAlert("Error fetching dashboard data", "error");
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    handleFetchDashboard();
+  }, [filterType]);
+
   return (
     <Box
       sx={{
@@ -56,34 +71,47 @@ export default function Dashboard() {
       }}
     >
       <Header />
-
-      {/* <Box sx={{ maxWidth: "1280px", mx: "auto" }}> */}
       <Box>
         {/* Top Stats Row */}
 
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Students" value="2" />
-          </Grid>
-          
-          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Orders" value="7" />
-          </Grid>
-
-          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Pending" value="3" />
+            <StatCard
+              title="Total Students"
+              value={dashboard?.data?.totalStudents || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Completed" value="4" />
+            <StatCard
+              title="Total Orders"
+              value={dashboard?.data?.totalOrders || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Cash" value="5" />
+            <StatCard
+              title="Pending"
+              value={dashboard?.data?.pendingOrders || 0}
+            />
           </Grid>
 
           <Grid size={{ xs: 6, md: 4, lg: 2 }}>
-            <StatCard title="Total Earned (₹)" value="37" />
+            <StatCard
+              title="Completed"
+              value={dashboard?.data?.completedOrders || 0}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
+            <StatCard title="Cash" value={dashboard?.data?.cashCount || 0} />
+          </Grid>
+
+          <Grid size={{ xs: 6, md: 4, lg: 2 }}>
+            <StatCard
+              title="Total Earned (₹)"
+              value={dashboard?.data?.totalEarned || 0}
+            />
           </Grid>
         </Grid>
 
@@ -103,7 +131,13 @@ export default function Dashboard() {
           }}
         >
           <FormControl size="small" sx={{ minWidth: 200, flex: { md: 1 } }}>
-            <Select defaultValue="today" displayEmpty>
+            <Select
+              defaultValue="all"
+              displayEmpty
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <MenuItem value="all">All</MenuItem>
               <MenuItem value="today">Today</MenuItem>
               <MenuItem value="yesterday">Yesterday</MenuItem>
               <MenuItem value="week">This Week</MenuItem>
@@ -146,13 +180,30 @@ export default function Dashboard() {
 
         {/* Second Stats Row */}
 
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 3 }} textTransform={"capitalize"}>
           <Grid size={{ xs: 12, md: 3 }}>
-            <InfoCard label="Filter: Today" value="—" />
+            <InfoCard
+              label={`Filter: ${filterType}`}
+              value={
+                dashboard?.filters?.fromDate
+                  ? dashboard?.filters?.filterType === "today" ||
+                    dashboard?.filters?.filterType === "yesterday"
+                    ? moment(dashboard?.filters?.fromDate).format("DD/MM/YYYY")
+                    : `${
+                        moment(dashboard?.filters?.fromDate).format(
+                          "DD/MM/YYYY"
+                        ) +
+                        " To " +
+                        moment(dashboard?.filters?.toDate).format("DD/MM/YYYY")
+                      }`
+                  : "--"
+              }
+              style={{ textTransform: "capitalize", fontSize: "16px" }}
+            />
           </Grid>
 
           <Grid size={{ xs: 12, md: 3 }}>
-            <InfoCard label="Cash Count" value="1" subtext="₹5" />
+            <InfoCard label="Cash Count" value="0" subtext="₹0" />
           </Grid>
 
           <Grid size={{ xs: 12, md: 3 }}>
@@ -162,7 +213,11 @@ export default function Dashboard() {
           <Grid size={{ xs: 12, md: 3 }}>
             <InfoCard
               label="Updated"
-              subtext="12/11/2025, 10:37:19 AM"
+              subtext={
+                dashboard?.lastUpdated
+                  ? moment(dashboard?.lastUpdated).format("DD/MM/YYYY hh:mm A")
+                  : "--"
+              }
               value=""
             />
           </Grid>
@@ -188,54 +243,62 @@ export default function Dashboard() {
             </Typography>
 
             <Box sx={{ height: 300, width: "100%" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <XAxis
-                    dataKey="name"
-                    stroke="#94a3b8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}`}
-                  />
-
-                  <Tooltip
-                    cursor={{ fill: "#f1f5f9" }}
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "none",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+              {isLoading ? (
+                <>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
-                  />
+                  >
+                    <CircularProgress size={30} />
+                  </Box>
+                </>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dashboard?.chartData}>
+                    <XAxis
+                      dataKey="name"
+                      stroke="#94a3b8"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
 
-                  <Bar
-                    dataKey="count"
-                    fill="#3b82f6"
-                    radius={[4, 4, 0, 0]}
-                    barSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+                    <YAxis
+                      stroke="#94a3b8"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}`}
+                    />
+
+                    <Tooltip
+                      cursor={{ fill: "#f1f5f9" }}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "none",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                    />
+
+                    <Bar
+                      dataKey="count"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                      barSize={40}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </Box>
           </CardContent>
         </Card>
       </Box>
-
-      {/* Footer */}
-
-      <Box sx={{ mt: 6, textAlign: "center", pb: 3 }}>
-        <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
-          Introducing Smart-Xerox — A Digital Solution for College Xerox Shop
-          Management
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 }
@@ -295,21 +358,16 @@ function StatCard({ title, value }) {
   );
 }
 
-function InfoCard({ label, value, subtext }) {
+function InfoCard({ label, value, subtext, style }) {
   return (
     <Card
       elevation={0}
       sx={{
         border: "1px solid #e2e8f0",
-
         borderRadius: 3,
-
         height: "100%",
-
         display: "flex",
-
         alignItems: "center",
-
         justifyContent: "center",
       }}
     >
@@ -324,7 +382,11 @@ function InfoCard({ label, value, subtext }) {
         </Typography>
 
         {value && (
-          <Typography variant="h4" sx={{ fontWeight: 700, color: "#0f172a" }}>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 700, color: "#0f172a" }}
+            style={style}
+          >
             {value}
           </Typography>
         )}

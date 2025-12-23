@@ -13,6 +13,10 @@ app.use(express.json());
 
 app.use("/api", serverRoutes);
 
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
+
 connectDB(process.env.MONGO_URI, process.env.DB_NAME);
 
 app.listen(process.env.PORT, () => {

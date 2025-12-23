@@ -19,9 +19,11 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ ...req.body, password: hashedPassword });
     delete user.password;
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.json({
       success: true,
       data: user,
+      token,
       message: "User register successfully.",
     });
   } catch {
@@ -48,7 +50,15 @@ const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Incorrect password." });
     delete user.password;
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+    if(user.role !== 'admin'){
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin only",
+      });
+    }
+    
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({
       success: true,
       token,
