@@ -47,7 +47,7 @@ export default function Orders() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchItem, setSearchItem] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleFetchOrders = async (currentPage = 1) => {
@@ -88,6 +88,7 @@ export default function Orders() {
     if (
       window.confirm("Are you sure you want to change this order’s status?")
     ) {
+      setLoading(true);
       try {
         const res = await axiosInstance.patch("/api/order/change-status", {
           orderId,
@@ -101,6 +102,8 @@ export default function Orders() {
       } catch (error) {
         generateAlert("Error changing order status", "error");
         console.error("Error changing order status:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -118,6 +121,7 @@ export default function Orders() {
 
   const handleDelete = async (orderId) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
+      setLoading(true);
       try {
         const res = await axiosInstance.delete(`/api/order/delete/${orderId}`);
         if (res.status === 200) {
@@ -128,6 +132,8 @@ export default function Orders() {
       } catch (error) {
         generateAlert("Error deleting order", "error");
         console.error("Error deleting order:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -228,6 +234,7 @@ export default function Orders() {
               <Button
                 variant="contained"
                 startIcon={<Refresh />}
+                disabled={isLoading}
                 sx={{
                   bgcolor: "#3b82f6",
                   "&:hover": { bgcolor: "#2563eb" },
@@ -361,6 +368,7 @@ export default function Orders() {
                             <Button
                               size="small"
                               variant="contained"
+                              disabled={loading}
                               startIcon={<CheckCircle sx={{ fontSize: 14 }} />}
                               sx={{
                                 bgcolor: "#059669",
@@ -382,6 +390,7 @@ export default function Orders() {
                             size="small"
                             variant="contained"
                             startIcon={<Print sx={{ fontSize: 14 }} />}
+                            disabled={loading}
                             sx={{
                               bgcolor: "#06b6d4",
                               "&:hover": { bgcolor: "#0891b2" },
@@ -399,6 +408,7 @@ export default function Orders() {
                             variant="outlined"
                             startIcon={<DeleteForever sx={{ fontSize: 14 }} />}
                             color="error"
+                            disabled={loading}
                             sx={{
                               fontSize: "0.65rem",
                               py: 0.5,

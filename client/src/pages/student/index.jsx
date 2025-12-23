@@ -39,6 +39,7 @@ export default function Student() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchItem, setSearchItem] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleFetchStudent = async (currentPage = 1) => {
@@ -68,6 +69,7 @@ export default function Student() {
 
   const handleDeleteStudent = async (id) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
+      setLoading(true);
       try {
         const res = await axiosInstance.delete(`/api/student/${id}`);
         if (res.status === 200) {
@@ -77,6 +79,8 @@ export default function Student() {
       } catch (error) {
         generateAlert("Error deleting student", "error");
         console.error("Error deleting student:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -181,6 +185,7 @@ export default function Student() {
                   textTransform: "none",
                 }}
                 onClick={handleRefresh}
+                disabled={isLoading}
               >
                 Refresh
               </Button>
@@ -267,6 +272,7 @@ export default function Student() {
                       <TableCell>
                         <IconButton
                           size="small"
+                          disabled={loading}
                           onClick={() => handleDeleteStudent(student._id)}
                           sx={{
                             color: "#ef4444",
