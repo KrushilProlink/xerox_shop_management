@@ -138,6 +138,7 @@ export default function Login() {
               size="small"
               fullWidth
               name="email"
+              disabled={loading}
               value={formik.values.email}
               onChange={formik.handleChange}
               error={formik.touched.email && Boolean(formik.errors.email)}
@@ -150,6 +151,7 @@ export default function Login() {
               size="small"
               fullWidth
               name="password"
+              disabled={loading}
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
