@@ -5,7 +5,6 @@ export const setAlertHandler = (handler) => {
 };
 
 export const generateAlert = (message, severity = "success") => {
-  // alert(message)
   if (alertHandler) {
     alertHandler(message, severity);  
   } else {
